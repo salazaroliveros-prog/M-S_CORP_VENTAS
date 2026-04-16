@@ -148,16 +148,13 @@ export const CalculatorPage = () => {
                     const dep = GUATEMALA_DEPARTMENTS.find(d => d.name === e.target.value);
                     if (dep) setDepartment(dep);
                   }}
+                  title="Departamento"
                 >
                   {GUATEMALA_DEPARTMENTS.map(dep => (
                     <option key={dep.name} value={dep.name}>{dep.name}</option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Tipo de Obra</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2 mt-4">
                   {(['economica', 'estandar', 'premium'] as const).map(type => (
                     <button
                       key={type}
@@ -165,6 +162,7 @@ export const CalculatorPage = () => {
                       className={`py-2 px-3 rounded-lg border text-[10px] font-bold uppercase tracking-widest transition-all ${
                         workType === type ? 'bg-gold text-black border-gold' : 'bg-input border-border text-text-dim hover:border-gold/50'
                       }`}
+                      title={`Seleccionar tipo ${type}`}
                     >
                       {type}
                     </button>
@@ -175,51 +173,21 @@ export const CalculatorPage = () => {
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-text-dim mb-2">Área de Construcción (m²)</label>
                 <div className="relative">
-                  <input
-                    type="number"
-                    value={m2}
-                    onChange={(e) => setM2(Number(e.target.value))}
-                    className="w-full bg-input border border-border rounded-lg py-4 px-4 text-2xl font-black text-white focus:ring-2 focus:ring-gold outline-none"
-                  />
+                    <input
+                      type="number"
+                      value={m2}
+                      onChange={(e) => setM2(Number(e.target.value))}
+                      className="w-full bg-input border border-border rounded-lg py-4 px-4 text-2xl font-black text-white focus:ring-2 focus:ring-gold outline-none"
+                      placeholder="Área en metros cuadrados"
+                      title="Área de construcción en metros cuadrados"
+                    />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-dim font-bold">M²</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {!showResults && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-panel p-8 rounded-xl border border-gold/30 shadow-2xl shadow-gold/5"
-            >
-              <h3 className="text-xs font-bold text-gold uppercase tracking-widest mb-4">Ver Resultados Detallados</h3>
-              <form onSubmit={handleLeadSubmit} className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Tu Nombre"
-                  required
-                  value={leadInfo.name}
-                  onChange={e => setLeadInfo({...leadInfo, name: e.target.value})}
-                  className="w-full bg-input border border-border rounded-lg py-3 px-4 text-white text-sm outline-none focus:border-gold"
-                />
-                <input
-                  type="tel"
-                  placeholder="Teléfono / WhatsApp"
-                  required
-                  value={leadInfo.phone}
-                  onChange={e => setLeadInfo({...leadInfo, phone: e.target.value})}
-                  className="w-full bg-input border border-border rounded-lg py-3 px-4 text-white text-sm outline-none focus:border-gold"
-                />
-                <button
-                  type="submit"
-                  className="w-full bg-gold text-black font-bold py-4 rounded-lg text-xs uppercase tracking-widest hover:bg-gold/90 transition-all flex items-center justify-center gap-2"
-                >
-                  Calcular Ahora <ArrowRight className="w-4 h-4" />
-                </button>
-              </form>
-            </motion.div>
-          )}
+          {/* Eliminado bloque duplicado y mal cerrado */}
 
           <GuatemalaMap 
             selectedDepartment={department.name} 
@@ -317,6 +285,7 @@ export const CalculatorPage = () => {
               <button 
                 onClick={() => setShowPurchaseModal(false)}
                 className="text-text-dim hover:text-white transition-colors"
+                title="Cerrar modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -342,13 +311,15 @@ export const CalculatorPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-text-dim">Cargar Comprobante</label>
+                  <label htmlFor="comprobante-upload" className="block text-[10px] font-bold uppercase tracking-widest text-text-dim">Cargar Comprobante</label>
                   <div className="relative group">
                     <input 
+                      id="comprobante-upload"
                       type="file" 
                       accept="image/*"
                       onChange={handleFileUpload}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      title="Subir comprobante de pago"
                     />
                     <div className="border-2 border-dashed border-border group-hover:border-accent/50 rounded-xl p-8 transition-all flex flex-col items-center justify-center gap-3 bg-bg/30">
                       {receiptUrl ? (

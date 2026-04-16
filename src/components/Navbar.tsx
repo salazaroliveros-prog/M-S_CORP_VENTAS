@@ -2,9 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Layout, Calculator, ShoppingBag, Settings, Menu, X, User, LogIn } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { auth, db } from '../lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { prisma } from '../lib/prisma';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -13,18 +11,18 @@ export const Navbar = () => {
   const location = useLocation();
 
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        if (userDoc.exists()) {
-          setRole(userDoc.data().role);
-        }
-      } else {
+    // Simulación de autenticación: obtener usuario de localStorage/session o contexto global
+    const fakeUser = { id: 'test-user-id', email: 'test@correo.com', name: 'Usuario Demo' };
+    setUser(fakeUser);
+    const fetchRole = async () => {
+      try {
+        const dbUser = await prisma.user.findUnique({ where: { id: fakeUser.id } });
+        setRole(dbUser?.role || null);
+      } catch {
         setRole(null);
       }
-    });
-    return () => unsubscribe();
+    };
+    fetchRole();
   }, []);
 
   const navLinks = [

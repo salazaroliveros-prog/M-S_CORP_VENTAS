@@ -99,6 +99,7 @@ export const UserProfile = () => {
               <button 
                 onClick={() => setShowAvatarEditor(!showAvatarEditor)}
                 className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-all text-white"
+                title="Editar avatar"
               >
                 <Camera className="w-6 h-6" />
               </button>
@@ -126,6 +127,7 @@ export const UserProfile = () => {
                         } catch (error) {}
                       }}
                       className={`w-10 h-10 rounded-full border-2 transition-all ${userData?.avatarUrl?.includes(seed) ? 'border-accent' : 'border-border opacity-50'}`}
+                      title={`Seleccionar avatar ${seed}`}
                     >
                       <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`} alt={seed} className="w-full h-full rounded-full" />
                     </button>
@@ -158,6 +160,7 @@ export const UserProfile = () => {
                         }
                       }}
                       className="bg-accent text-black p-2 rounded hover:bg-accent/90 transition-all"
+                      title="Guardar avatar personalizado"
                     >
                       <Check className="w-4 h-4" />
                     </button>
@@ -203,6 +206,7 @@ export const UserProfile = () => {
                       <button 
                         onClick={() => deleteNotification(notif.id)}
                         className="text-text-dim hover:text-red-500 transition-colors"
+                        title="Eliminar notificación"
                       >
                         <LogOut className="w-3 h-3 rotate-90" />
                       </button>

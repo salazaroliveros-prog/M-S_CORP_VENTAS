@@ -4,7 +4,7 @@ import { LogIn, Mail, Lock, AlertCircle, ArrowRight, UserPlus, Check } from 'luc
 import { prisma } from '../lib/prisma';
 import { getUserByEmail, createUser } from '../lib/user';
 import { handlePrismaError } from '../lib/prismaError';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
 export const LoginPage = () => {

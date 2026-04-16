@@ -31,7 +31,7 @@ export const Home = () => {
             </div>
             <h3 className="text-xl font-bold text-white">Software Especializado</h3>
             <p className="text-text-dim text-sm leading-relaxed">
-              Apps de cálculo, ERP y herramientas de control diseñadas por ingenieros para ingenieros.
+              Apps de cálculo, ERP y herramientas de control diseñadas por Arquitectos para todos.
             </p>
           </div>
           <div className="space-y-4">

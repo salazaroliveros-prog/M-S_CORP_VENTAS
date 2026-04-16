@@ -2,9 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ShoppingCart, Download, ExternalLink, Check, Upload, CreditCard, Clock, MessageSquare } from 'lucide-react';
 import { DIGITAL_PRODUCTS } from '../constants/data';
-import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, updateDoc, arrayUnion, collection, addDoc, serverTimestamp, onSnapshot, query, where } from 'firebase/firestore';
+import { prisma } from '../lib/prisma';
+import { handlePrismaError } from '../lib/prismaError';
 import { useNavigate } from 'react-router-dom';
 
 export const ProductsPage = () => {
@@ -17,73 +16,74 @@ export const ProductsPage = () => {
   const [isUploading, setIsUploading] = React.useState(false);
   const navigate = useNavigate();
 
+  // Simulación de autenticación: obtener usuario de localStorage/session o contexto global
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        // Listen to user purchases
-        const userRef = doc(db, 'users', currentUser.uid);
-        const unsubUser = onSnapshot(userRef, (docSnap) => {
-          if (docSnap.exists()) {
-            setPurchasedIds(docSnap.data().purchases || []);
-          }
-        }, (error) => {
-          handleFirestoreError(error, OperationType.GET, `users/${currentUser.uid}`);
-        });
+    // Aquí deberías obtener el usuario autenticado real
+    // Por ahora, simula un usuario de prueba
+    const fakeUser = { id: 'test-user-id', email: 'test@correo.com', name: 'Usuario Demo' };
+    setUser(fakeUser);
+  }, []);
 
-        // Listen to pending receipts (Filtered by user)
-        const q = query(
-          collection(db, 'payment_receipts'), 
-          where('userId', '==', currentUser.uid)
+  // Obtener compras y recibos pendientes del usuario desde Prisma
+  React.useEffect(() => {
+    if (!user) return;
+    const fetchUserData = async () => {
+      try {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          include: { paymentReceipts: true },
+        });
+        setPurchasedIds(dbUser?.purchases || []);
+        setPendingReceipts(
+          dbUser?.paymentReceipts?.filter(r => r.status === 'pending').map(r => r.productId) || []
         );
-        const unsubReceipts = onSnapshot(q, (snapshot) => {
-          const pending = snapshot.docs
-            .map(doc => doc.data())
-            .filter(r => r.status === 'pending')
-            .map(r => r.productId);
-          setPendingReceipts(pending);
-        }, (error) => {
-          handleFirestoreError(error, OperationType.LIST, 'payment_receipts');
-        });
-
-        // Get bank info
-        try {
-          const configDoc = await getDoc(doc(db, 'config', 'site'));
-          if (configDoc.exists()) {
-            setBankInfo(configDoc.data().bankAccountInfo || 'Información bancaria no disponible.');
-          }
-        } catch (error) {
-          handleFirestoreError(error, OperationType.GET, 'config/site');
-        }
-
-        return () => {
-          unsubUser();
-          unsubReceipts();
-        };
+      } catch (error) {
+        handlePrismaError(error, 'GET', `user/${user.id}`);
       }
-    });
-    return () => unsubscribe();
+    };
+    fetchUserData();
+  }, [user]);
+
+  // Obtener info bancaria desde la tabla Config (puedes ajustar el modelo si es necesario)
+  React.useEffect(() => {
+    const fetchBankInfo = async () => {
+      try {
+        const config = await prisma.config.findUnique({ where: { id: 'site' } });
+        setBankInfo(config?.bankAccountInfo || 'Información bancaria no disponible.');
+      } catch (error) {
+        handlePrismaError(error, 'GET', 'config/site');
+      }
+    };
+    fetchBankInfo();
   }, []);
 
   const handleUploadReceipt = async () => {
     if (!user || !selectedProduct || !receiptUrl) return;
     setIsUploading(true);
     try {
-      await addDoc(collection(db, 'payment_receipts'), {
-        id: `receipt_${Date.now()}`,
-        userId: user.uid,
-        userName: user.displayName || user.email,
-        productId: selectedProduct.id,
-        productName: selectedProduct.name,
-        receiptImageUrl: receiptUrl,
-        status: 'pending',
-        createdAt: serverTimestamp()
+      await prisma.paymentReceipt.create({
+        data: {
+          userId: user.id,
+          userName: user.name || user.email,
+          productId: selectedProduct.id,
+          productName: selectedProduct.name,
+          receiptImageUrl: receiptUrl,
+          status: 'pending',
+        },
       });
       alert('Comprobante enviado con éxito. El administrador validará su pago pronto.');
       setSelectedProduct(null);
       setReceiptUrl('');
+      // Actualizar recibos pendientes
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: { paymentReceipts: true },
+      });
+      setPendingReceipts(
+        dbUser?.paymentReceipts?.filter(r => r.status === 'pending').map(r => r.productId) || []
+      );
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, 'payment_receipts');
+      handlePrismaError(error, 'CREATE', 'payment_receipts');
       alert('Error al enviar el comprobante.');
     } finally {
       setIsUploading(false);
@@ -209,12 +209,15 @@ export const ProductsPage = () => {
                       title="Consultar sobre este producto"
                     >
                       <MessageSquare className="w-5 h-5" />
+                      <span className="sr-only">Consultar sobre este producto</span>
                     </button>
                     <button 
                       onClick={() => handlePurchaseClick(product)}
                       className="bg-gold text-black p-3 rounded-lg hover:bg-gold/90 transition-all shadow-lg shadow-gold/10"
+                      title="Comprar producto"
                     >
                       <ShoppingCart className="w-5 h-5" />
+                      <span className="sr-only">Comprar producto</span>
                     </button>
                   </div>
                 )}
@@ -238,8 +241,9 @@ export const ProductsPage = () => {
                   <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Proceso de <span className="text-accent">Adquisición</span></h2>
                   <p className="text-text-dim text-xs uppercase tracking-widest mt-1">{selectedProduct.name}</p>
                 </div>
-                <button onClick={() => setSelectedProduct(null)} className="text-text-dim hover:text-white transition-colors">
+                <button onClick={() => setSelectedProduct(null)} className="text-text-dim hover:text-white transition-colors" title="Cerrar modal">
                   <ExternalLink className="w-6 h-6 rotate-45" />
+                  <span className="sr-only">Cerrar modal</span>
                 </button>
               </header>
 
@@ -298,8 +302,10 @@ export const ProductsPage = () => {
                         <button 
                           onClick={() => setReceiptUrl('')}
                           className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-all"
+                          title="Eliminar imagen de comprobante"
                         >
                           <ExternalLink className="w-4 h-4 rotate-45" />
+                          <span className="sr-only">Eliminar imagen de comprobante</span>
                         </button>
                       </div>
                     </div>

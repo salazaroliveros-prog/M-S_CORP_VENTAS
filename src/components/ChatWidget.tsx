@@ -173,16 +173,7 @@ export const ChatWidget = () => {
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
-    if (!isTyping && chatId) {
-      setIsTyping(true);
-      updateDoc(doc(db, 'chats', chatId), { userTyping: true })
-        .catch(err => handleFirestoreError(err, OperationType.UPDATE, `chats/${chatId}`));
-      setTimeout(() => {
-        setIsTyping(false);
-        updateDoc(doc(db, 'chats', chatId), { userTyping: false })
-          .catch(err => handleFirestoreError(err, OperationType.UPDATE, `chats/${chatId}`));
-      }, 3000);
-    }
+    // Si se requiere lógica de "typing" en tiempo real, implementar con Prisma y polling o websockets
   };
 
   const handleSendMessage = async (text: string) => {
@@ -243,10 +234,10 @@ export const ChatWidget = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setShowSettings(!showSettings)} className="text-black/60 hover:text-black transition-colors">
+                <button onClick={() => setShowSettings(!showSettings)} className="text-black/60 hover:text-black transition-colors" title="Ajustes">
                   <Settings className="w-4 h-4" />
                 </button>
-                <button onClick={() => setIsOpen(false)} className="text-black/60 hover:text-black transition-colors">
+                <button onClick={() => setIsOpen(false)} className="text-black/60 hover:text-black transition-colors" title="Cerrar chat">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -264,10 +255,7 @@ export const ChatWidget = () => {
                             const url = user.photoURL;
                             setUserAvatar(url);
                             localStorage.setItem('construms_user_avatar', url);
-                            if (chatId) {
-                              updateDoc(doc(db, 'chats', chatId), { userAvatar: url })
-                                .catch(err => handleFirestoreError(err, OperationType.UPDATE, `chats/${chatId}`));
-                            }
+                            // Si se requiere actualizar el avatar en la base de datos, hacerlo con Prisma
                           }}
                           className={`w-10 h-10 rounded-full border-2 transition-all shrink-0 overflow-hidden ${userAvatar === user.photoURL ? 'border-accent scale-110' : 'border-border opacity-50'}`}
                         >
@@ -283,10 +271,7 @@ export const ChatWidget = () => {
                             const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
                             setUserAvatar(url);
                             localStorage.setItem('construms_user_avatar', url);
-                            if (chatId) {
-                              updateDoc(doc(db, 'chats', chatId), { userAvatar: url })
-                                .catch(err => handleFirestoreError(err, OperationType.UPDATE, `chats/${chatId}`));
-                            }
+                            // Si se requiere actualizar el avatar en la base de datos, hacerlo con Prisma
                           }}
                           className={`w-10 h-10 rounded-full border-2 transition-all shrink-0 ${userAvatar.includes(seed) ? 'border-accent scale-110' : 'border-border opacity-50'}`}
                         >
@@ -317,10 +302,7 @@ export const ChatWidget = () => {
                           }
                           setUserAvatar(customAvatarUrl);
                           localStorage.setItem('construms_user_avatar', customAvatarUrl);
-                          if (chatId) {
-                            updateDoc(doc(db, 'chats', chatId), { userAvatar: customAvatarUrl })
-                              .catch(err => handleFirestoreError(err, OperationType.UPDATE, `chats/${chatId}`));
-                          }
+                          // Si se requiere actualizar el avatar en la base de datos, hacerlo con Prisma
                           setCustomAvatarUrl('');
                         }
                       }}
@@ -417,6 +399,7 @@ export const ChatWidget = () => {
             <div className="p-2 flex gap-2 overflow-x-auto border-t border-border bg-bg/30">
               {quickReplies.map((reply) => (
                 <button
+                  title="Enviar mensaje"
                   key={reply}
                   onClick={() => handleSendMessage(reply)}
                   className="whitespace-nowrap px-3 py-1 rounded-full border border-border text-[10px] text-text-dim hover:border-accent hover:text-accent transition-all"
@@ -445,6 +428,7 @@ export const ChatWidget = () => {
                 <button
                   type="submit"
                   className="bg-accent text-black p-2 rounded-lg hover:bg-accent/90 transition-all"
+                  title="Enviar mensaje"
                 >
                   <Send className="w-4 h-4" />
                 </button>

@@ -2,8 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { prisma } from '../lib/prisma';
+import { handlePrismaError } from '../lib/prismaError';
 import { CONSTRUCTION_SERVICES } from '../constants/data';
 
 export const ServicesPage = () => {
@@ -20,19 +20,16 @@ export const ServicesPage = () => {
   });
 
   React.useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'services'), (snapshot) => {
-      const servicesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      // Fallback to static data if Firestore is empty
-      setServices(servicesData.length > 0 ? servicesData : CONSTRUCTION_SERVICES);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.GET, 'services');
-      setServices(CONSTRUCTION_SERVICES);
-    });
-
-    return () => unsubscribe();
+    const fetchServices = async () => {
+      try {
+        const dbServices = await prisma.service.findMany();
+        setServices(dbServices.length > 0 ? dbServices : CONSTRUCTION_SERVICES);
+      } catch (error) {
+        handlePrismaError(error, 'GET', 'services');
+        setServices(CONSTRUCTION_SERVICES);
+      }
+    };
+    fetchServices();
   }, []);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -171,6 +168,8 @@ export const ServicesPage = () => {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className={`w-full bg-input border rounded-lg py-4 px-6 text-white focus:ring-2 focus:ring-accent outline-none transition-all ${errors.name ? 'border-red-500' : 'border-border'}`} 
+              placeholder="Nombre completo"
+              title="Nombre completo"
             />
             {errors.name && <p className="text-[9px] text-red-500 uppercase font-bold">{errors.name}</p>}
           </div>
@@ -181,6 +180,8 @@ export const ServicesPage = () => {
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className={`w-full bg-input border rounded-lg py-4 px-6 text-white focus:ring-2 focus:ring-accent outline-none transition-all ${errors.email ? 'border-red-500' : 'border-border'}`} 
+              placeholder="Correo electrónico"
+              title="Correo electrónico"
             />
             {errors.email && <p className="text-[9px] text-red-500 uppercase font-bold">{errors.email}</p>}
           </div>
@@ -190,6 +191,7 @@ export const ServicesPage = () => {
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               className="w-full bg-input border border-border rounded-lg py-4 px-6 text-white focus:ring-2 focus:ring-accent outline-none"
+              title="Tipo de edificación"
             >
               <option>Residencial</option>
               <option>Industrial</option>
@@ -205,6 +207,7 @@ export const ServicesPage = () => {
               onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
               className={`w-full bg-input border rounded-lg py-4 px-6 text-white focus:ring-2 focus:ring-accent outline-none transition-all ${errors.budget ? 'border-red-500' : 'border-border'}`} 
               placeholder="Q. 0.00" 
+              title="Presupuesto estimado"
             />
             {errors.budget && <p className="text-[9px] text-red-500 uppercase font-bold">{errors.budget}</p>}
           </div>
@@ -217,6 +220,7 @@ export const ServicesPage = () => {
               value={formData.duration}
               onChange={(e) => setFormData({ ...formData, duration: Number(e.target.value) })}
               className="w-full accent-accent" 
+              title="Plazo deseado en meses"
             />
             <div className="flex justify-between text-[10px] text-text-dim font-bold uppercase">
               <span>1 Mes</span>
@@ -231,6 +235,8 @@ export const ServicesPage = () => {
               value={formData.details}
               onChange={(e) => setFormData({ ...formData, details: e.target.value })}
               className={`w-full bg-input border rounded-lg py-4 px-6 text-white focus:ring-2 focus:ring-accent outline-none resize-none transition-all ${errors.details ? 'border-red-500' : 'border-border'}`}
+              placeholder="Describe los detalles de tu proyecto"
+              title="Detalles del proyecto"
             ></textarea>
             {errors.details && <p className="text-[9px] text-red-500 uppercase font-bold">{errors.details}</p>}
           </div>
