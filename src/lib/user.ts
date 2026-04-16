@@ -1,28 +1,8 @@
-// Ejemplo de función para obtener usuario por email
-import { prisma } from './prisma';
-import { handlePrismaError } from './prismaError';
-
-export async function getUserByEmail(email: string) {
-  try {
-    return await prisma.user.findUnique({ where: { email } });
-  } catch (error) {
-    handlePrismaError(error, 'get', `user/email/${email}`);
-    return null;
-  }
+// SOLO USAR EN ENDPOINTS API O BACKEND
+if (typeof window !== 'undefined') {
+  throw new Error('src/lib/user.ts solo debe usarse en backend/API, nunca en frontend');
 }
-
-// Ejemplo de función para crear usuario
-export async function createUser(data: {
-  email: string;
-  name?: string;
-  password?: string;
-  role?: string;
-  avatarUrl?: string;
-}) {
-  try {
-    return await prisma.user.create({ data });
-  } catch (error) {
-    handlePrismaError(error, 'create', 'user');
-    return null;
-  }
-}
+// import { prisma } from './prisma';
+// import { handlePrismaError } from './prismaError';
+// export async function getUserByEmail(email: string) { ... }
+// export async function createUser(data: any) { ... }

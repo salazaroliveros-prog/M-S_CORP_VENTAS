@@ -1,5 +1,5 @@
 // Utilidad para manejar errores de Prisma
-import { Prisma } from '@prisma/client';
+// import { Prisma } from '@prisma/client'; // Solo backend
 
 export function handlePrismaError(error: any, operationType: string, path: string | null) {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {

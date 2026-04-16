@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Calculator as CalcIcon, MapPin, Ruler, Info, ArrowRight, Upload, Check, CreditCard, Clock, X } from 'lucide-react';
 import { GUATEMALA_DEPARTMENTS } from '../constants/data';
 import { GuatemalaMap } from '../components/GuatemalaMap';
-// import { prisma } from '../lib/prisma';
+// import { prisma } from '../lib/prisma'; // Solo backend, migrar a API
 import { useNavigate } from 'react-router-dom';
 
 export const CalculatorPage = () => {

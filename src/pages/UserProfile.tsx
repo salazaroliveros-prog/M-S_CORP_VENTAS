@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Package, Download, FileText, LogOut, User, ShoppingBag, Bell, Camera, Check, ArrowLeft, ArrowRight } from 'lucide-react';
-// import { prisma } from '../lib/prisma';
+// import { prisma } from '../lib/prisma'; // Solo backend, migrar a API
 import { useNavigate } from 'react-router-dom';
 import { DIGITAL_PRODUCTS } from '../constants/data';
 

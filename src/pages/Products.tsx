@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ShoppingCart, Download, ExternalLink, Check, Upload, CreditCard, Clock, MessageSquare } from 'lucide-react';
 import { DIGITAL_PRODUCTS } from '../constants/data';
-// import { prisma } from '../lib/prisma';
+// import { prisma } from '../lib/prisma'; // Solo backend, migrar a API
 // import { handlePrismaError } from '../lib/prismaError';
 import { useNavigate } from 'react-router-dom';
 

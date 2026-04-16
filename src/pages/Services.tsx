@@ -2,8 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { prisma } from '../lib/prisma';
-import { handlePrismaError } from '../lib/prismaError';
+// import { prisma } from '../lib/prisma';
+// import { handlePrismaError } from '../lib/prismaError';
 import { CONSTRUCTION_SERVICES } from '../constants/data';
 
 export const ServicesPage = () => {
@@ -22,10 +22,10 @@ export const ServicesPage = () => {
   React.useEffect(() => {
     const fetchServices = async () => {
       try {
-        const dbServices = await prisma.service.findMany();
-        setServices(dbServices.length > 0 ? dbServices : CONSTRUCTION_SERVICES);
+        // TODO: Obtener servicios vía endpoint API
+        // setServices(...)
+        setServices(CONSTRUCTION_SERVICES); // fallback temporal
       } catch (error) {
-        handlePrismaError(error, 'GET', 'services');
         setServices(CONSTRUCTION_SERVICES);
       }
     };

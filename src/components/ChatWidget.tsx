@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Bot, Check, Clock, Settings } from 'lucide-react';
 // import { prisma } from '../lib/prisma';
-import { getUserByEmail } from '../lib/user';
+// import { getUserByEmail } from '../lib/user';
 
 interface Message {
   id: string;
@@ -25,16 +25,11 @@ export const ChatWidget = () => {
   const [showSettings, setShowSettings] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  // Migración: obtener usuario desde PostgreSQL/Neon por email guardado en localStorage (o null si no existe)
+  // TODO: Obtener usuario vía endpoint API usando email guardado en localStorage (o null si no existe)
   React.useEffect(() => {
     const email = localStorage.getItem('construms_user_email');
     if (email) {
-      getUserByEmail(email).then((dbUser) => {
-        setUser(dbUser);
-        if (dbUser?.avatarUrl) {
-          setUserAvatar(dbUser.avatarUrl);
-        }
-      });
+      // fetch('/api/user?email=' + encodeURIComponent(email)) ...
     }
   }, []);
 

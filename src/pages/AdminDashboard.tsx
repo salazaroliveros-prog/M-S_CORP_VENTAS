@@ -34,7 +34,7 @@ import {
   Tooltip, 
   ResponsiveContainer
 } from 'recharts';
-// import { prisma } from '../lib/prisma';
+// import { prisma } from '../lib/prisma'; // Solo backend, migrar a API
 import { useNavigate } from 'react-router-dom';
 // import { DIGITAL_PRODUCTS } from '../constants/data';
 
