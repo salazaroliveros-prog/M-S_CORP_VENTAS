@@ -103,6 +103,17 @@ model Config {
   contactAddress String
   bankAccountInfo String
   updatedAt   DateTime?
+  sections    Json?
+}
+model Lead {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String
+  workType    String
+  department  String
+  m2          Int
+  estimatedTotal Float
+  createdAt   DateTime @default(now())
 }
 
 model DigitalProduct {
