@@ -11,18 +11,23 @@ export const Navbar = () => {
   const location = useLocation();
 
   React.useEffect(() => {
-    // Simulación de autenticación: obtener usuario de localStorage/session o contexto global
-    const fakeUser = { id: 'test-user-id', email: 'test@correo.com', name: 'Usuario Demo' };
-    setUser(fakeUser);
-    const fetchRole = async () => {
+    // Obtener usuario y rol desde JWT en localStorage
+    const token = localStorage.getItem('construms_user_token');
+    if (token) {
       try {
-        // TODO: Obtener rol de usuario vía endpoint API
-        // setRole(...)
+        const decoded = require('jwt-decode')(token);
+        if (decoded && typeof decoded === 'object') {
+          setUser({ email: decoded.email, name: decoded.name });
+          setRole(decoded.role || null);
+        }
       } catch {
+        setUser(null);
         setRole(null);
       }
-    };
-    fetchRole();
+    } else {
+      setUser(null);
+      setRole(null);
+    }
   }, []);
 
   const navLinks = [

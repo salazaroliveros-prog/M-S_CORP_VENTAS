@@ -20,10 +20,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!valid) {
       return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     }
+    // Forzar rol admin solo para el correo del administrador
+    let role = user.role;
+    if (user.email === 'salazaroliveros@gmail.com') {
+      if (user.role !== 'admin') {
+        await prisma.user.update({ where: { email }, data: { role: 'admin' } });
+      }
+      role = 'admin';
+    } else if (user.role !== 'user') {
+      await prisma.user.update({ where: { email }, data: { role: 'user' } });
+      role = 'user';
+    }
     // Generar JWT
-    const token = signJwt({ id: user.id, email: user.email, name: user.name, role: user.role });
+    const token = signJwt({ id: user.id, email: user.email, name: user.name, role });
     return res.status(200).json({
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      user: { id: user.id, email: user.email, name: user.name, role },
       token
     });
   } catch (error) {

@@ -16,12 +16,21 @@ export const ProductsPage = () => {
   const [isUploading, setIsUploading] = React.useState(false);
   const navigate = useNavigate();
 
-  // Simulación de autenticación: obtener usuario de localStorage/session o contexto global
+  // Obtener usuario autenticado real desde JWT
   React.useEffect(() => {
-    // Aquí deberías obtener el usuario autenticado real
-    // Por ahora, simula un usuario de prueba
-    const fakeUser = { id: 'test-user-id', email: 'test@correo.com', name: 'Usuario Demo' };
-    setUser(fakeUser);
+    const token = localStorage.getItem('construms_user_token');
+    if (token) {
+      try {
+        const decoded = require('jwt-decode')(token);
+        if (decoded && typeof decoded === 'object') {
+          setUser({ id: decoded.id, email: decoded.email, name: decoded.name });
+        }
+      } catch {
+        setUser(null);
+      }
+    } else {
+      setUser(null);
+    }
   }, []);
 
   // Obtener compras y recibos pendientes del usuario desde Prisma

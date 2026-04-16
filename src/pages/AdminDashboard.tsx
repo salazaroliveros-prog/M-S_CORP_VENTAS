@@ -119,12 +119,30 @@ export const AdminDashboard = () => {
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  // Auth & Role Check (simulado, reemplazar con lógica real de autenticación si es necesario)
+  // Auth & Role Check real usando JWT
   React.useEffect(() => {
-    // Aquí deberías obtener el usuario autenticado desde tu backend/API
-    // Simulación: usuario admin por defecto
-    setUserRole('admin');
-    setAdminAvatar('https://api.dicebear.com/7.x/bottts/svg?seed=admin');
+    const token = localStorage.getItem('construms_user_token');
+    if (token) {
+      try {
+        const decoded = require('jwt-decode')(token);
+        if (decoded && typeof decoded === 'object' && 'role' in decoded) {
+          setUserRole(decoded.role);
+          setAdminAvatar('https://api.dicebear.com/7.x/bottts/svg?seed=admin');
+          if (decoded.role !== 'admin') {
+            window.location.href = '/perfil';
+          }
+        } else {
+          setUserRole(null);
+          window.location.href = '/login';
+        }
+      } catch {
+        setUserRole(null);
+        window.location.href = '/login';
+      }
+    } else {
+      setUserRole(null);
+      window.location.href = '/login';
+    }
   }, []);
 
   // Polling para chat sessions (cada 10 segundos)

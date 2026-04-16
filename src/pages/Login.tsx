@@ -18,14 +18,18 @@ export const LoginPage = () => {
 
   React.useEffect(() => {
     // Si ya hay usuario logueado en localStorage, redirigir
-    const email = localStorage.getItem('construms_user_email');
-    if (email) {
-      // No validamos contra backend aquí, solo redirigimos si hay email guardado
-      if (email === 'salazaroliveros@gmail.com') {
-        navigate('/admin');
-      } else {
-        navigate('/perfil');
-      }
+    const token = localStorage.getItem('construms_user_token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded && typeof decoded === 'object' && 'role' in decoded) {
+          if (decoded.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/perfil');
+          }
+        }
+      } catch {}
     }
     // Si venimos de Google OAuth
     if (window.location.hash && localStorage.getItem('google_oauth_pending')) {
@@ -48,11 +52,17 @@ export const LoginPage = () => {
               }),
             });
             const data = await resp.json();
-            if (data.user) {
+            if (data.user && data.token) {
               localStorage.setItem('construms_user_email', data.user.email);
               localStorage.setItem('construms_user_avatar', data.user.avatar || '');
-              if (data.user.email === 'salazaroliveros@gmail.com') {
-                navigate('/admin');
+              localStorage.setItem('construms_user_token', data.token);
+              const decoded = jwtDecode(data.token);
+              if (decoded && typeof decoded === 'object' && 'role' in decoded) {
+                if (decoded.role === 'admin') {
+                  navigate('/admin');
+                } else {
+                  navigate('/perfil');
+                }
               } else {
                 navigate('/perfil');
               }
@@ -104,13 +114,19 @@ export const LoginPage = () => {
           body: JSON.stringify({ email, password }),
         });
         const data = await resp.json();
-        if (!resp.ok || !data.user) {
+        if (!resp.ok || !data.user || !data.token) {
           setError(data.error || 'Credenciales incorrectas.');
         } else {
           localStorage.setItem('construms_user_email', data.user.email);
           localStorage.setItem('construms_user_avatar', data.user.avatar || '');
-          if (data.user.email === 'salazaroliveros@gmail.com') {
-            navigate('/admin');
+          localStorage.setItem('construms_user_token', data.token);
+          const decoded = jwtDecode(data.token);
+          if (decoded && typeof decoded === 'object' && 'role' in decoded) {
+            if (decoded.role === 'admin') {
+              navigate('/admin');
+            } else {
+              navigate('/perfil');
+            }
           } else {
             navigate('/perfil');
           }

@@ -21,9 +21,19 @@ export const UserProfile = () => {
   };
 
   React.useEffect(() => {
-    // Obtener usuario desde localStorage/email
-    const email = localStorage.getItem('construms_user_email');
-    if (!email) {
+    // Obtener usuario autenticado real desde JWT
+    const token = localStorage.getItem('construms_user_token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    try {
+      const decoded = require('jwt-decode')(token);
+      if (decoded && typeof decoded === 'object') {
+        setUserData({ id: decoded.id, email: decoded.email, name: decoded.name });
+      }
+    } catch {
+      setUserData(null);
       navigate('/login');
       return;
     }
