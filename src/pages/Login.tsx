@@ -84,8 +84,12 @@ export const LoginPage = () => {
     setError(null);
     setLoading(true);
     try {
-      // Redirigir a Google OAuth2 (usando endpoint de Google)
-      const clientId = 'TU_CLIENT_ID_GOOGLE'; // Reemplaza por tu clientId
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      if (!clientId) {
+        setError('Falta configurar VITE_GOOGLE_CLIENT_ID en el entorno. Contacta al administrador.');
+        setLoading(false);
+        return;
+      }
       const redirectUri = window.location.origin + '/login';
       const scope = 'profile email';
       const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
@@ -96,6 +100,10 @@ export const LoginPage = () => {
       setLoading(false);
     }
   };
+        {/* Advertencia de seguridad para consola */}
+        <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded text-yellow-700 text-xs">
+          <b>Advertencia:</b> No pegues código desconocido en la consola del navegador. Podrías comprometer tu cuenta (Self-XSS).
+        </div>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
