@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Layout, Calculator, ShoppingBag, Settings, Menu, X, User, LogIn } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { prisma } from '../lib/prisma';
+// import { prisma } from '../lib/prisma';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -16,8 +16,8 @@ export const Navbar = () => {
     setUser(fakeUser);
     const fetchRole = async () => {
       try {
-        const dbUser = await prisma.user.findUnique({ where: { id: fakeUser.id } });
-        setRole(dbUser?.role || null);
+        // TODO: Obtener rol de usuario vía endpoint API
+        // setRole(...)
       } catch {
         setRole(null);
       }

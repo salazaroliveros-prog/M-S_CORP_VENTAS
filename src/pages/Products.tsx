@@ -2,8 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ShoppingCart, Download, ExternalLink, Check, Upload, CreditCard, Clock, MessageSquare } from 'lucide-react';
 import { DIGITAL_PRODUCTS } from '../constants/data';
-import { prisma } from '../lib/prisma';
-import { handlePrismaError } from '../lib/prismaError';
+// import { prisma } from '../lib/prisma';
+// import { handlePrismaError } from '../lib/prismaError';
 import { useNavigate } from 'react-router-dom';
 
 export const ProductsPage = () => {
@@ -29,16 +29,9 @@ export const ProductsPage = () => {
     if (!user) return;
     const fetchUserData = async () => {
       try {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
-          include: { paymentReceipts: true },
-        });
-        setPurchasedIds(dbUser?.purchases || []);
-        setPendingReceipts(
-          dbUser?.paymentReceipts?.filter(r => r.status === 'pending').map(r => r.productId) || []
-        );
+        // TODO: Consumir usuario y recibos desde endpoint API
       } catch (error) {
-        handlePrismaError(error, 'GET', `user/${user.id}`);
+        // Manejar error de API
       }
     };
     fetchUserData();
@@ -48,10 +41,9 @@ export const ProductsPage = () => {
   React.useEffect(() => {
     const fetchBankInfo = async () => {
       try {
-        const config = await prisma.config.findUnique({ where: { id: 'site' } });
-        setBankInfo(config?.bankAccountInfo || 'Información bancaria no disponible.');
+        // TODO: Consumir config desde endpoint API
       } catch (error) {
-        handlePrismaError(error, 'GET', 'config/site');
+        // Manejar error de API
       }
     };
     fetchBankInfo();
@@ -61,29 +53,12 @@ export const ProductsPage = () => {
     if (!user || !selectedProduct || !receiptUrl) return;
     setIsUploading(true);
     try {
-      await prisma.paymentReceipt.create({
-        data: {
-          userId: user.id,
-          userName: user.name || user.email,
-          productId: selectedProduct.id,
-          productName: selectedProduct.name,
-          receiptImageUrl: receiptUrl,
-          status: 'pending',
-        },
-      });
+      // TODO: Enviar comprobante a backend vía endpoint API
       alert('Comprobante enviado con éxito. El administrador validará su pago pronto.');
       setSelectedProduct(null);
       setReceiptUrl('');
-      // Actualizar recibos pendientes
-      const dbUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        include: { paymentReceipts: true },
-      });
-      setPendingReceipts(
-        dbUser?.paymentReceipts?.filter(r => r.status === 'pending').map(r => r.productId) || []
-      );
+      // TODO: Actualizar recibos pendientes desde API
     } catch (error) {
-      handlePrismaError(error, 'CREATE', 'payment_receipts');
       alert('Error al enviar el comprobante.');
     } finally {
       setIsUploading(false);

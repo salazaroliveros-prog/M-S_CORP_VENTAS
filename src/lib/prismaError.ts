@@ -1,4 +1,4 @@
-// Utilidad para manejar errores de Prisma de forma similar a Firestore
+// Utilidad para manejar errores de Prisma
 import { Prisma } from '@prisma/client';
 
 export function handlePrismaError(error: any, operationType: string, path: string | null) {

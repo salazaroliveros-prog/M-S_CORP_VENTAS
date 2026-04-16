@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Calculator as CalcIcon, MapPin, Ruler, Info, ArrowRight, Upload, Check, CreditCard, Clock, X } from 'lucide-react';
 import { GUATEMALA_DEPARTMENTS } from '../constants/data';
 import { GuatemalaMap } from '../components/GuatemalaMap';
-import { prisma } from '../lib/prisma';
+// import { prisma } from '../lib/prisma';
 import { useNavigate } from 'react-router-dom';
 
 export const CalculatorPage = () => {
@@ -29,15 +29,12 @@ export const CalculatorPage = () => {
     // Obtener usuario desde localStorage/email (ajustar según tu flujo de login)
     const email = localStorage.getItem('construms_user_email');
     if (email) {
-      prisma.user.findUnique({ where: { email } }).then(setUser);
+      // TODO: Consumir usuario desde endpoint API
     }
     // Obtener info bancaria desde la tabla Config
     const fetchBankInfo = async () => {
       try {
-        const configDb = await prisma.config.findUnique({ where: { id: 'site' } });
-        if (configDb) {
-          setBankInfo(configDb.bankAccountInfo || 'Información bancaria no disponible.');
-        }
+        // TODO: Consumir config desde endpoint API
       } catch (error) {
         setBankInfo('Información bancaria no disponible.');
       }
@@ -49,17 +46,7 @@ export const CalculatorPage = () => {
     e.preventDefault();
     if (!leadInfo.name || !leadInfo.phone) return;
     try {
-      await prisma.lead.create({
-        data: {
-          name: leadInfo.name,
-          phone: leadInfo.phone,
-          m2,
-          department: department.name,
-          workType,
-          estimatedTotal: totalCost,
-          createdAt: new Date()
-        }
-      });
+      // TODO: Enviar lead a backend vía endpoint API
       setShowResults(true);
     } catch (error) {
       setShowResults(true); // Mostrar resultados aunque falle
@@ -85,23 +72,7 @@ export const CalculatorPage = () => {
     if (!user || !receiptUrl) return;
     setIsUploading(true);
     try {
-      await prisma.paymentReceipt.create({
-        data: {
-          id: `receipt_${Date.now()}`,
-          userId: user.id,
-          userName: user.name || user.email,
-          productId: 'expediente_tecnico',
-          productName: `Expediente Técnico (${m2}m² en ${department.name})`,
-          receiptImageUrl: receiptUrl,
-          status: 'pending',
-          createdAt: new Date(),
-          details: {
-            m2,
-            department: department.name,
-            totalEstimated: totalCost
-          }
-        }
-      });
+      // TODO: Enviar comprobante a backend vía endpoint API
       alert('Comprobante enviado con éxito. El administrador validará su pago pronto.');
       setShowPurchaseModal(false);
       setReceiptUrl('');

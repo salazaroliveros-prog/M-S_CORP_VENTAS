@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Bot, Check, Clock, Settings } from 'lucide-react';
-import { prisma } from '../lib/prisma';
+// import { prisma } from '../lib/prisma';
 import { getUserByEmail } from '../lib/user';
 
 interface Message {
@@ -69,32 +69,9 @@ export const ChatWidget = () => {
   React.useEffect(() => {
     if (!chatId && isOpen) {
       const newChatId = `chat_${Date.now()}`;
-      prisma.chatSession.create({
-        data: {
-          id: newChatId,
-          status: 'active',
-          createdAt: new Date(),
-          userId: user?.id || null,
-          userName: user?.name || user?.email || 'Visitante',
-          userAvatar: userAvatar,
-          lastActivity: new Date()
-        }
-      }).then(() => {
-        localStorage.setItem('construms_chat_id', newChatId);
-        setChatId(newChatId);
-        // Mensaje inicial del sistema
-        prisma.chatMessage.create({
-          data: {
-            chatId: newChatId,
-            text: 'Chat iniciado. Un asesor se conectará pronto.',
-            sender: 'system',
-            isSystem: true,
-            timestamp: new Date()
-          }
-        }).catch(() => {});
-      }).catch((error) => {
-        console.error('Error creando chat:', error);
-      });
+      // TODO: Crear sesión de chat vía endpoint API
+      // Al crear, guardar chatId en localStorage y setChatId
+      // También crear mensaje inicial vía API
     }
   }, [isOpen, chatId]);
 
@@ -104,47 +81,10 @@ export const ChatWidget = () => {
     let polling = true;
     const fetchMessages = async () => {
       try {
-        const msgsDb = await prisma.chatMessage.findMany({
-          where: { chatId },
-          orderBy: { timestamp: 'asc' }
-        });
-        setMessages(msgsDb.map(msg => ({
-          id: msg.id,
-          text: msg.text,
-          sender: msg.sender as any,
-          senderAvatar: msg.senderAvatar,
-          timestamp: msg.timestamp,
-          read: msg.read,
-          isSystem: msg.isSystem
-        })));
-        // Estado del chat
-        const chatDb = await prisma.chatSession.findUnique({ where: { id: chatId } });
-        if (chatDb) {
-          setAdminTyping(!!chatDb.adminTyping);
-          setChatStatus(chatDb.status as any);
-          // Auto-cierre por inactividad
-          if (chatDb.status === 'active' && chatDb.lastActivity) {
-            const lastAct = new Date(chatDb.lastActivity);
-            const now = new Date();
-            const diffMins = (now.getTime() - lastAct.getTime()) / (1000 * 60);
-            if (diffMins > 30) {
-              await prisma.chatSession.update({
-                where: { id: chatId },
-                data: { status: 'closed', closedReason: 'inactivity' }
-              });
-              await prisma.chatMessage.create({
-                data: {
-                  chatId,
-                  text: 'Conversación cerrada por inactividad.',
-                  sender: 'admin',
-                  isSystem: true,
-                  timestamp: new Date()
-                }
-              });
-              setChatStatus('closed');
-            }
-          }
-        }
+        // TODO: Obtener mensajes y estado de chat vía endpoint API
+        // setMessages(...)
+        // setAdminTyping(...)
+        // setChatStatus(...)
       } catch (error) {
         console.error('Error leyendo mensajes/chat:', error);
       }
@@ -179,26 +119,7 @@ export const ChatWidget = () => {
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || !chatId) return;
     try {
-      await prisma.chatMessage.create({
-        data: {
-          chatId,
-          text,
-          sender: 'user',
-          senderAvatar: userAvatar,
-          timestamp: new Date(),
-          read: false
-        }
-      });
-      // Actualizar último mensaje y actividad en chat
-      await prisma.chatSession.update({
-        where: { id: chatId },
-        data: {
-          lastMessage: text,
-          lastMessageAt: new Date(),
-          lastActivity: new Date(),
-          userTyping: false
-        }
-      });
+      // TODO: Enviar mensaje vía endpoint API
       setInputValue('');
     } catch (error) {
       console.error('Error enviando mensaje:', error);

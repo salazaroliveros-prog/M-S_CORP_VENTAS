@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Package, Download, FileText, LogOut, User, ShoppingBag, Bell, Camera, Check, ArrowLeft, ArrowRight } from 'lucide-react';
-import { prisma } from '../lib/prisma';
+// import { prisma } from '../lib/prisma';
 import { useNavigate } from 'react-router-dom';
 import { DIGITAL_PRODUCTS } from '../constants/data';
 
@@ -29,16 +29,8 @@ export const UserProfile = () => {
     }
     const fetchUserAndNotifications = async () => {
       try {
-        const userDb = await prisma.user.findUnique({ where: { email } });
-        setUserData(userDb);
+        // TODO: Consumir usuario y notificaciones desde endpoint API
         setLoading(false);
-        if (userDb) {
-          const notifs = await prisma.notification.findMany({
-            where: { userId: userDb.id },
-            orderBy: { createdAt: 'desc' }
-          });
-          setNotifications(notifs);
-        }
       } catch (error) {
         setLoading(false);
       }
@@ -54,14 +46,14 @@ export const UserProfile = () => {
 
   const markAsRead = async (notifId: string) => {
     try {
-      await prisma.notification.update({ where: { id: notifId }, data: { read: true } });
+      // TODO: Marcar notificación como leída vía endpoint API
       setNotifications((prev) => prev.map(n => n.id === notifId ? { ...n, read: true } : n));
     } catch (error) {}
   };
 
   const deleteNotification = async (notifId: string) => {
     try {
-      await prisma.notification.delete({ where: { id: notifId } });
+      // TODO: Eliminar notificación vía endpoint API
       setNotifications((prev) => prev.filter(n => n.id !== notifId));
     } catch (error) {}
   };
@@ -121,7 +113,7 @@ export const UserProfile = () => {
                         const url = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
                         try {
                           if (userData?.id) {
-                            await prisma.user.update({ where: { id: userData.id }, data: { avatarUrl: url } });
+                            // TODO: Actualizar avatar vía endpoint API
                             setUserData({ ...userData, avatarUrl: url });
                           }
                         } catch (error) {}
@@ -152,7 +144,7 @@ export const UserProfile = () => {
                           }
                           try {
                             if (userData?.id) {
-                              await prisma.user.update({ where: { id: userData.id }, data: { avatarUrl: customAvatarUrl } });
+                              // TODO: Actualizar avatar vía endpoint API
                               setUserData({ ...userData, avatarUrl: customAvatarUrl });
                               setCustomAvatarUrl('');
                             }

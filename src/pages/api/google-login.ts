@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '../../lib/prisma';
+import { signJwt } from '../../lib/jwt';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -16,13 +17,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: {
           email,
           name: name || '',
-          avatar: avatar || '',
-          provider: 'google',
+          avatarUrl: avatar || '',
+          role: 'user',
         },
       });
+    } else {
+      // Actualizar nombre/avatar si cambió
+      user = await prisma.user.update({
+        where: { email },
+        data: {
+          name: name || user.name,
+          avatarUrl: avatar || user.avatarUrl
+        }
+      });
     }
-    // Aquí puedes generar un JWT o sesión
-    return res.status(200).json({ user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar } });
+    // Generar JWT
+    const token = signJwt({ id: user.id, email: user.email, name: user.name, role: user.role });
+    return res.status(200).json({
+      user: { id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl, role: user.role },
+      token
+    });
   } catch (error) {
     return res.status(500).json({ error: 'Error interno' });
   }

@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-import { prisma } from '../lib/prisma';
-import { useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface PageConfig {
   heroTitle: string;
@@ -35,11 +33,10 @@ export const usePageConfig = () => {
   const fetchConfig = useCallback(async () => {
     setLoading(true);
     try {
-      // Busca el registro de configuración en la tabla Config
-      const configDb = await prisma.config.findUnique({ where: { id: 'site' } });
-      if (configDb) {
-        setConfig({ ...DEFAULT_CONFIG, ...configDb });
-      }
+      // TODO: Consumir la configuración desde un endpoint API
+      // Ejemplo: const res = await fetch('/api/config');
+      // const configDb = await res.json();
+      // if (configDb) setConfig({ ...DEFAULT_CONFIG, ...configDb });
     } catch (error) {
       console.error('Error cargando configuración de página:', error);
     }

@@ -34,7 +34,7 @@ import {
   Tooltip, 
   ResponsiveContainer
 } from 'recharts';
-import { prisma } from '../lib/prisma';
+// import { prisma } from '../lib/prisma';
 import { useNavigate } from 'react-router-dom';
 // import { DIGITAL_PRODUCTS } from '../constants/data';
 
@@ -133,12 +133,10 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchChats = async () => {
       try {
-        const sessions = await prisma.chatSession.findMany({
-          orderBy: { createdAt: 'desc' },
-          include: { messages: true },
-        });
-        const filtered = sessions.filter((chat: any) => chat.status === chatFilter);
-        setChatSessions(filtered);
+        // TODO: Consumir sesiones de chat desde endpoint API
+        // const sessions = await fetch('/api/chats').then(r => r.json());
+        // const filtered = sessions.filter((chat: any) => chat.status === chatFilter);
+        // setChatSessions(filtered);
       } catch (error) {
         // Manejo de error opcional
       }
@@ -154,8 +152,8 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchLeads = async () => {
       try {
-        const leadsData = await prisma.lead.findMany({ orderBy: { createdAt: 'desc' } });
-        setLeads(leadsData);
+        // TODO: Consumir leads desde endpoint API
+        // setLeads(leadsData);
       } catch (error) {}
     };
     fetchLeads();
@@ -175,8 +173,8 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchProjects = async () => {
       try {
-        const projectsData = await prisma.project.findMany({ orderBy: { createdAt: 'desc' } });
-        setProjects(projectsData);
+        // TODO: Consumir proyectos desde endpoint API
+        // setProjects(projectsData);
       } catch (error) {}
     };
     fetchProjects();
@@ -190,9 +188,9 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchTasks = async () => {
       try {
-        const tasksData = await prisma.task.findMany({ orderBy: { createdAt: 'desc' } });
-        setTasks(tasksData);
-        setPrevTasksCount(tasksData.length);
+        // TODO: Consumir tareas desde endpoint API
+        // setTasks(tasksData);
+        // setPrevTasksCount(tasksData.length);
       } catch (error) {}
     };
     fetchTasks();
@@ -206,8 +204,8 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchConfig = async () => {
       try {
-        const configData = await prisma.config.findUnique({ where: { id: 'site' } });
-        if (configData) setPageConfig(configData);
+        // TODO: Consumir configuración desde endpoint API
+        // if (configData) setPageConfig(configData);
       } catch (error) {}
     };
     fetchConfig();
@@ -221,8 +219,8 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchUsers = async () => {
       try {
-        const usersData = await prisma.user.findMany();
-        setAllUsers(usersData);
+        // TODO: Obtener usuarios vía endpoint API
+        // setAllUsers(...)
       } catch (error) {}
     };
     fetchUsers();
@@ -236,8 +234,8 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchReceipts = async () => {
       try {
-        const receiptsData = await prisma.paymentReceipt.findMany({ orderBy: { createdAt: 'desc' } });
-        setPaymentReceipts(receiptsData);
+        // TODO: Obtener recibos de pago vía endpoint API
+        // setPaymentReceipts(...)
       } catch (error) {}
     };
     fetchReceipts();
@@ -250,8 +248,8 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchProducts = async () => {
       try {
-        const productsData = await prisma.digitalProduct.findMany();
-        setProducts(productsData);
+        // TODO: Obtener productos digitales vía endpoint API
+        // setProducts(...)
       } catch (error) {}
     };
     fetchProducts();
@@ -264,8 +262,8 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchServices = async () => {
       try {
-        const servicesData = await prisma.service.findMany();
-        setServices(servicesData);
+        // TODO: Obtener servicios vía endpoint API
+        // setServices(...)
       } catch (error) {}
     };
     fetchServices();
@@ -278,8 +276,8 @@ export const AdminDashboard = () => {
     let interval: NodeJS.Timeout;
     const fetchLanding = async () => {
       try {
-        const landingData = await prisma.config.findUnique({ where: { id: 'landing' } });
-        if (landingData && landingData.sections) setLandingSections(landingData.sections);
+        // TODO: Obtener secciones de landing vía endpoint API
+        // setLandingSections(...)
       } catch (error) {}
     };
     fetchLanding();
@@ -289,39 +287,7 @@ export const AdminDashboard = () => {
 
   const handleApprovePayment = async (receipt: any) => {
     try {
-      // 1. Actualizar estado del comprobante
-      await prisma.paymentReceipt.update({
-        where: { id: receipt.id },
-        data: {
-          status: 'approved',
-          validatedAt: new Date()
-        }
-      });
-
-      // 2. Agregar producto a compras del usuario
-      const user = await prisma.user.findUnique({ where: { id: receipt.userId } });
-      if (user) {
-        await prisma.user.update({
-          where: { id: receipt.userId },
-          data: {
-            purchases: { set: [...(user.purchases || []), receipt.productId] }
-          }
-        });
-      }
-
-      // 3. Crear notificación
-      await prisma.notification.create({
-        data: {
-          id: `notif_${Date.now()}`,
-          userId: receipt.userId,
-          title: 'Pago Aprobado',
-          message: `Tu pago por "${receipt.productName}" ha sido validado con éxito. Ya puedes acceder a tu producto.`,
-          type: 'success',
-          read: false,
-          createdAt: new Date()
-        }
-      });
-
+      // TODO: Aprobar pago vía endpoint API (actualizar estado, agregar producto a usuario, crear notificación)
       alert(`Pago aprobado. El producto "${receipt.productName}" ha sido añadido a la cuenta de ${receipt.userName}.`);
     } catch (error) {
       alert('Error al aprobar el pago.');
@@ -331,26 +297,7 @@ export const AdminDashboard = () => {
   const handleRejectPayment = async (receipt: any) => {
     if (!confirm('¿Estás seguro de rechazar este comprobante?')) return;
     try {
-      await prisma.paymentReceipt.update({
-        where: { id: receipt.id },
-        data: {
-          status: 'rejected',
-          validatedAt: new Date()
-        }
-      });
-
-      // Crear notificación de rechazo
-      await prisma.notification.create({
-        data: {
-          id: `notif_${Date.now()}`,
-          userId: receipt.userId,
-          title: 'Pago Rechazado',
-          message: `Tu comprobante de pago para "${receipt.productName}" ha sido rechazado. Por favor, verifica la información e intenta de nuevo.`,
-          type: 'error',
-          read: false,
-          createdAt: new Date()
-        }
-      });
+      // TODO: Rechazar pago vía endpoint API (actualizar estado, crear notificación)
     } catch (error) {
       alert('Error al rechazar el pago.');
     }
@@ -358,18 +305,7 @@ export const AdminDashboard = () => {
 
   const handleSaveConfig = async () => {
     try {
-      await prisma.config.upsert({
-        where: { id: 'site' },
-        update: {
-          ...pageConfig,
-          updatedAt: new Date()
-        },
-        create: {
-          ...pageConfig,
-          id: 'site',
-          updatedAt: new Date()
-        }
-      });
+      // TODO: Guardar configuración vía endpoint API
       alert('Configuración guardada correctamente');
     } catch (error) {
       alert('Error al guardar la configuración');
@@ -387,21 +323,7 @@ export const AdminDashboard = () => {
           const lastActivity = new Date(session.lastActivity).getTime();
           if (now - lastActivity > INACTIVITY_LIMIT) {
             try {
-              await prisma.chatSession.update({
-                where: { id: session.id },
-                data: { status: 'closed', closedReason: 'inactivity' }
-              });
-              await prisma.chatMessage.create({
-                data: {
-                  id: `msg_system_${Date.now()}`,
-                  chatId: session.id,
-                  text: 'SISTEMA: Esta sesión se ha cerrado automáticamente debido a 30 minutos de inactividad.',
-                  sender: 'admin',
-                  timestamp: new Date(),
-                  read: false,
-                  isSystem: true
-                }
-              });
+              // TODO: Cerrar sesión de chat y crear mensaje de cierre vía endpoint API
             } catch (err) {
               // Manejo de error opcional
             }
@@ -412,7 +334,7 @@ export const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, [userRole, chatSessions, activeTab]);
 
-  // Recordatorios de tareas con Prisma
+  // Recordatorios de tareas (migrar a API)
   React.useEffect(() => {
     if (!userRole || tasks.length === 0) return;
     const checkReminders = async () => {
@@ -424,21 +346,7 @@ export const AdminDashboard = () => {
           if (dueDate <= twoDaysFromNow && dueDate >= now) {
             try {
               sendNotification('Recordatorio de Tarea', `La tarea "${task.title}" vence pronto (${task.dueDate})`);
-              await prisma.task.update({
-                where: { id: task.id },
-                data: { reminderSent: true }
-              });
-              await prisma.notification.create({
-                data: {
-                  id: `notif_rem_${Date.now()}`,
-                  userId: task.assignedTo || '',
-                  title: 'Vencimiento Próximo',
-                  message: `La tarea "${task.title}" vence el ${task.dueDate}.`,
-                  type: 'warning',
-                  read: false,
-                  createdAt: new Date()
-                }
-              });
+              // TODO: Actualizar tarea y crear notificación vía endpoint API
             } catch (err) {
               // Manejo de error opcional
             }
@@ -458,27 +366,8 @@ export const AdminDashboard = () => {
   const handleSendReply = async () => {
     if (!replyText.trim() || !selectedChatId) return;
     try {
-      await prisma.chatMessage.create({
-        data: {
-          id: `msg_${Date.now()}`,
-          chatId: selectedChatId,
-          text: replyText,
-          sender: 'admin',
-          senderAvatar: adminAvatar,
-          timestamp: new Date(),
-          read: false
-        }
-      });
+      // TODO: Enviar mensaje y actualizar sesión vía endpoint API
       setReplyText('');
-      await prisma.chatSession.update({
-        where: { id: selectedChatId },
-        data: {
-          adminTyping: false,
-          lastActivity: new Date(),
-          lastMessage: replyText,
-          lastMessageAt: new Date()
-        }
-      });
     } catch (error) {
       alert('Error al enviar el mensaje');
     }
@@ -502,13 +391,7 @@ export const AdminDashboard = () => {
       return;
     }
     try {
-      await prisma.project.create({
-        data: {
-          ...newProject,
-          id: `proj_${Date.now()}`,
-          createdAt: new Date()
-        }
-      });
+      // TODO: Crear proyecto vía endpoint API
       setNewProject({ title: '', description: '', image: '', link: '', deliveryDate: '', status: 'active' });
     } catch (error) {
       alert('Error al crear el proyecto');
@@ -523,17 +406,7 @@ export const AdminDashboard = () => {
       return;
     }
     try {
-      await prisma.project.update({
-        where: { id: editingProject.id },
-        data: {
-          title: editingProject.title,
-          description: editingProject.description,
-          image: editingProject.image,
-          link: editingProject.link,
-          deliveryDate: editingProject.deliveryDate || '',
-          status: editingProject.status || 'active'
-        }
-      });
+      // TODO: Actualizar proyecto vía endpoint API
       setEditingProject(null);
     } catch (error) {
       alert('Error al actualizar el proyecto');
@@ -543,10 +416,7 @@ export const AdminDashboard = () => {
   const toggleProjectStatus = async (projectId: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'completed' ? 'active' : 'completed';
-      await prisma.project.update({
-        where: { id: projectId },
-        data: { status: newStatus }
-      });
+      // TODO: Cambiar estado de proyecto vía endpoint API
     } catch (error) {
       alert('Error al cambiar el estado del proyecto');
     }
@@ -562,7 +432,7 @@ export const AdminDashboard = () => {
     }
     try {
       const id = `prod_${Date.now()}`;
-      await prisma.digitalProduct.create({ data: { ...newProduct, id } });
+      // TODO: Crear producto digital vía endpoint API
       setNewProduct({ name: '', description: '', price: 0, category: 'software', image: '' });
     } catch (error) {
       alert('Error al crear el producto');
@@ -577,10 +447,7 @@ export const AdminDashboard = () => {
       return;
     }
     try {
-      await prisma.digitalProduct.update({
-        where: { id: editingProduct.id },
-        data: editingProduct
-      });
+      // TODO: Actualizar producto digital vía endpoint API
       setEditingProduct(null);
     } catch (error) {
       alert('Error al actualizar el producto');
@@ -590,7 +457,7 @@ export const AdminDashboard = () => {
   const handleDeleteProduct = async (id: string) => {
     if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
     try {
-      await prisma.digitalProduct.delete({ where: { id } });
+      // TODO: Eliminar producto digital vía endpoint API
     } catch (error) {
       alert('Error al eliminar el producto');
     }
@@ -601,7 +468,7 @@ export const AdminDashboard = () => {
     e.preventDefault();
     try {
       const id = `serv_${Date.now()}`;
-      await prisma.service.create({ data: { ...newService, id } });
+      // TODO: Crear servicio vía endpoint API
       setNewService({ title: '', description: '', detailedDescription: '', price: 0, category: 'construccion', icon: 'HardHat' });
     } catch (error) {
       alert('Error al crear el servicio');
@@ -612,10 +479,7 @@ export const AdminDashboard = () => {
     e.preventDefault();
     if (!editingService) return;
     try {
-      await prisma.service.update({
-        where: { id: editingService.id },
-        data: editingService
-      });
+      // TODO: Actualizar servicio vía endpoint API
       setEditingService(null);
     } catch (error) {
       alert('Error al actualizar el servicio');
@@ -625,7 +489,7 @@ export const AdminDashboard = () => {
   const handleDeleteService = async (id: string) => {
     if (!confirm('¿Seguro que deseas eliminar este servicio?')) return;
     try {
-      await prisma.service.delete({ where: { id } });
+      // TODO: Eliminar servicio vía endpoint API
     } catch (error) {
       alert('Error al eliminar el servicio');
     }
@@ -634,11 +498,7 @@ export const AdminDashboard = () => {
   // Landing Page Reordering/Editing
   const handleUpdateLandingSections = async (newSections: any[]) => {
     try {
-      await prisma.config.upsert({
-        where: { id: 'landing' },
-        update: { sections: newSections },
-        create: { id: 'landing', sections: newSections }
-      });
+      // TODO: Actualizar secciones de landing vía endpoint API
     } catch (error) {
       alert('Error al actualizar las secciones de landing');
     }
@@ -671,15 +531,7 @@ export const AdminDashboard = () => {
     e.preventDefault();
     if (!newTask.title) return;
     try {
-      await prisma.task.create({
-        data: {
-          ...newTask,
-          id: `task_${Date.now()}`,
-          status: 'todo',
-          createdAt: new Date(),
-          reminderSent: false
-        }
-      });
+      // TODO: Crear tarea vía endpoint API
       setNewTask({ title: '', description: '', priority: 'medium', assignedTo: '', dueDate: '' });
     } catch (error) {
       alert('Error al crear la tarea');
@@ -688,10 +540,7 @@ export const AdminDashboard = () => {
 
   const updateTaskStatus = async (taskId: string, status: string) => {
     try {
-      await prisma.task.update({
-        where: { id: taskId },
-        data: { status }
-      });
+      // TODO: Actualizar estado de tarea vía endpoint API
     } catch (error) {
       alert('Error al actualizar el estado de la tarea');
     }
@@ -700,7 +549,7 @@ export const AdminDashboard = () => {
   const deleteProject = async (id: string) => {
     if (projectToDelete === id) {
       try {
-        await prisma.project.delete({ where: { id } });
+        // TODO: Eliminar proyecto vía endpoint API
         setProjectToDelete(null);
       } catch (error) {
         alert('Error al eliminar el proyecto');
@@ -2266,7 +2115,7 @@ export const AdminDashboard = () => {
                     <div className="p-4 bg-bg rounded-xl border border-border flex items-center gap-4">
                       <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                       <div>
-                        <p className="text-xs text-white font-bold">Firestore Database</p>
+                        <p className="text-xs text-white font-bold">Base de datos PostgreSQL</p>
                         <p className="text-[10px] text-text-dim">Conectado y Operativo</p>
                       </div>
                     </div>
