@@ -1,9 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { LogIn, Mail, Lock, AlertCircle, ArrowRight, UserPlus, Check } from 'lucide-react';
-import { prisma } from '../lib/prisma';
-import { getUserByEmail, createUser } from '../lib/user';
-import { handlePrismaError } from '../lib/prismaError';
+// import { jwtDecode } from 'jwt-decode';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 
@@ -22,15 +20,52 @@ export const LoginPage = () => {
     // Si ya hay usuario logueado en localStorage, redirigir
     const email = localStorage.getItem('construms_user_email');
     if (email) {
-      getUserByEmail(email).then((user) => {
-        if (user) {
-          if (user.email === 'salazaroliveros@gmail.com' || user.role === 'admin') {
-            navigate('/admin');
-          } else {
-            navigate('/perfil');
-          }
-        }
-      });
+      // No validamos contra backend aquí, solo redirigimos si hay email guardado
+      if (email === 'salazaroliveros@gmail.com') {
+        navigate('/admin');
+      } else {
+        navigate('/perfil');
+      }
+    }
+    // Si venimos de Google OAuth
+    if (window.location.hash && localStorage.getItem('google_oauth_pending')) {
+      const params = new URLSearchParams(window.location.hash.replace('#', '?'));
+      const accessToken = params.get('access_token');
+      if (accessToken) {
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+          .then((res) => res.json())
+          .then(async (profile) => {
+            // Llama a tu API para login/registro Google
+            const resp = await fetch('/api/google-login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: profile.email,
+                name: profile.name,
+                avatar: profile.picture,
+              }),
+            });
+            const data = await resp.json();
+            if (data.user) {
+              localStorage.setItem('construms_user_email', data.user.email);
+              localStorage.setItem('construms_user_avatar', data.user.avatar || '');
+              if (data.user.email === 'salazaroliveros@gmail.com') {
+                navigate('/admin');
+              } else {
+                navigate('/perfil');
+              }
+            } else {
+              setError('Error autenticando con Google');
+            }
+            localStorage.removeItem('google_oauth_pending');
+          })
+          .catch(() => {
+            setError('Error autenticando con Google');
+            localStorage.removeItem('google_oauth_pending');
+          });
+      }
     }
   }, [navigate]);
 
@@ -57,47 +92,32 @@ export const LoginPage = () => {
     setError(null);
     setSuccess(null);
     setLoading(true);
-
     try {
       if (isResetting) {
-        // Simulación de reset (enviar correo manualmente)
         setSuccess('Por favor contacta al administrador para restablecer tu contraseña.');
         setIsResetting(false);
       } else if (isLogin) {
-        // Login con email/contraseña
-        const user = await getUserByEmail(email);
-        if (!user || user.password !== password) {
-          setError('Credenciales incorrectas.');
+        // Login con email/contraseña usando API
+        const resp = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.user) {
+          setError(data.error || 'Credenciales incorrectas.');
         } else {
-          localStorage.setItem('construms_user_email', user.email);
-          localStorage.setItem('construms_user_avatar', user.avatarUrl || '');
-          if (user.email === 'salazaroliveros@gmail.com' || user.role === 'admin') {
+          localStorage.setItem('construms_user_email', data.user.email);
+          localStorage.setItem('construms_user_avatar', data.user.avatar || '');
+          if (data.user.email === 'salazaroliveros@gmail.com') {
             navigate('/admin');
           } else {
             navigate('/perfil');
           }
         }
       } else {
-        // Registro
-        const exists = await getUserByEmail(email);
-        if (exists) {
-          setError('Ya existe una cuenta con este correo.');
-        } else {
-          const newUser = await createUser({
-            email,
-            name,
-            password,
-            role: 'user',
-            avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
-          });
-          if (newUser) {
-            localStorage.setItem('construms_user_email', newUser.email);
-            localStorage.setItem('construms_user_avatar', newUser.avatarUrl || '');
-            navigate('/perfil');
-          } else {
-            setError('Error al crear usuario.');
-          }
-        }
+        // Registro usando API (puedes crear un endpoint /api/register si lo deseas)
+        setError('El registro solo está disponible por invitación.');
       }
     } catch (err: any) {
       setError('Error de autenticación.');
