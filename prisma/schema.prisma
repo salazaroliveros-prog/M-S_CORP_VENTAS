@@ -1,0 +1,125 @@
+// Esquema inicial de Prisma para migrar Firestore a PostgreSQL (Neon)
+// Puedes modificar los campos según evolucione la migración
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  name        String?
+  password    String?
+  role        String   @default("user")
+  avatarUrl   String?
+  purchases   String[]
+  createdAt   DateTime @default(now())
+  tasks       Task[]
+  notifications Notification[]
+  paymentReceipts PaymentReceipt[]
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  image       String?
+  link        String?
+  deliveryDate DateTime?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  priority    String   @default("medium")
+  assignedTo  String?
+  dueDate     DateTime?
+  status      String   @default("pending")
+  reminderSent Boolean @default(false)
+  user        User?    @relation(fields: [assignedTo], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model ChatSession {
+  id          String   @id @default(uuid())
+  userId      String
+  userName    String?
+  createdAt   DateTime @default(now())
+  messages    ChatMessage[]
+}
+
+model ChatMessage {
+  id          String   @id @default(uuid())
+  chatId      String
+  sender      String
+  text        String
+  read        Boolean  @default(false)
+  timestamp   DateTime @default(now())
+  chat        ChatSession @relation(fields: [chatId], references: [id])
+}
+
+model PaymentReceipt {
+  id          String   @id @default(uuid())
+  userId      String
+  userName    String?
+  productId   String
+  productName String
+  receiptImageUrl String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  validatedAt DateTime?
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  message     String
+  type        String
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Config {
+  id          String   @id
+  heroTitle   String
+  heroSubtitle String
+  heroImage   String
+  accentColor String
+  primaryColor String
+  footerText  String
+  contactEmail String
+  contactPhone String
+  contactAddress String
+  bankAccountInfo String
+  updatedAt   DateTime?
+}
+
+model DigitalProduct {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  category    String
+  image       String?
+  documents   Json?
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  icon        String?
+  price       Float?
+  category    String?
+}
